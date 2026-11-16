@@ -1,0 +1,771 @@
+:root {
+  --bg: #05050a;
+  --fg: #eef0f6;
+  --muted: #a3a8b8;
+  --card: rgb(18 19 28 / 0.82);
+  --border: rgb(255 255 255 / 0.12);
+  --accent: #8ab4ff;
+  --accent-hover: #a3c4ff;
+  --fab: #2b2e40;
+  --fab-hover: #3a3e55;
+  --danger: #ff8a8a;
+  --ok: #7ee0a1;
+  --radius: 12px;
+  /* Geist: even strokes and round geometry, matching the line icons. Bundled, not fetched. */
+  --font-sans: "Geist Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font: 400 14px / 1.45 var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: var(--fg);
+  background: var(--bg);
+}
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+}
+.app {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+}
+.app.cursor-hidden,
+.app.cursor-hidden * {
+  cursor: none;
+}
+.stage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.hud {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font: 400 11px / 1.3 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  background: rgb(0 0 0 / 0.4);
+  opacity: 0;
+  transition: opacity 200ms;
+  pointer-events: none;
+}
+.hud.visible {
+  opacity: 1;
+}
+
+.start {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+  padding: 24px;
+  background: radial-gradient(circle at 50% 40%, #181a2e, var(--bg) 70%);
+}
+.start[hidden] {
+  display: none;
+}
+.start h1 {
+  margin: 0 0 8px;
+  font-size: 40px;
+  font-weight: 300;
+  letter-spacing: -0.035em;
+}
+
+.btn {
+  font: inherit;
+  color: var(--fg);
+  background: rgb(255 255 255 / 0.08);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn:hover {
+  background: rgb(255 255 255 / 0.14);
+}
+.btn.primary {
+  background: var(--accent);
+  color: #0b1020;
+  border-color: transparent;
+  font-weight: 500;
+  padding: 10px 28px;
+  font-size: 16px;
+}
+.btn.primary:hover {
+  filter: brightness(1.08);
+}
+.btn[aria-pressed="true"] {
+  background: rgb(138 180 255 / 0.25);
+}
+kbd {
+  font: 400 11px var(--font-mono);
+  opacity: 0.6;
+  margin-left: 4px;
+}
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+select,
+input[type="number"] {
+  font: inherit;
+  color: var(--fg);
+  background: rgb(0 0 0 / 0.35);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 6px;
+}
+input[type="number"] {
+  width: 5.5em;
+}
+input[type="range"] {
+  accent-color: var(--accent);
+}
+.field {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+}
+.field[hidden] {
+  display: none;
+}
+.number {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+}
+
+/* Floating action buttons, bottom centre. Shown and hidden by FloatingPanel. */
+.fab-bar {
+  position: absolute;
+  left: 50%;
+  bottom: 28px;
+  display: flex;
+  gap: 16px;
+  transform: translate(-50%, 12px);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 300ms ease-in,
+    transform 300ms ease-in;
+}
+.fab-bar.visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  pointer-events: auto;
+  transition:
+    opacity 200ms ease-out,
+    transform 200ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fab-bar,
+  .fab-bar.visible {
+    transform: translate(-50%, 0);
+    transition: opacity 150ms linear;
+  }
+}
+.fab-slot {
+  position: relative;
+}
+/* Quiet glass buttons: hairline border, soft shadow, monochrome line icons. */
+.fab {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  border: 0.5px solid rgb(255 255 255 / 0.18);
+  border-radius: 50%;
+  color: rgb(255 255 255 / 0.88);
+  background: rgb(30 30 34 / 0.55);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
+  cursor: pointer;
+  transition:
+    background 200ms,
+    color 200ms,
+    transform 120ms;
+}
+.fab:hover {
+  background: rgb(58 58 64 / 0.65);
+  color: #fff;
+}
+.fab:active {
+  transform: scale(0.96);
+}
+/* Primary transport button: white disc, black glyph. */
+.fab.primary {
+  background: rgb(255 255 255 / 0.92);
+  border-color: transparent;
+  color: #111;
+}
+.fab.primary:hover {
+  background: #fff;
+  color: #000;
+}
+.fab[aria-expanded="true"] {
+  background: rgb(255 255 255 / 0.16);
+  border-color: rgb(255 255 255 / 0.4);
+  color: #fff;
+}
+.fab[hidden] {
+  display: none;
+}
+.icon {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.icon .f {
+  fill: currentColor;
+  stroke: none;
+}
+
+/* Tooltips: on hover and keyboard focus, never while the FAB's popover is open. */
+.fab::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translate(-50%, 4px);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+  color: #fff;
+  background: rgb(97 97 97 / 0.95);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 150ms,
+    transform 150ms;
+}
+.fab:hover::after,
+.fab:focus-visible::after {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  transition-delay: 300ms;
+}
+.fab[aria-expanded="true"]::after {
+  opacity: 0;
+}
+
+/* Input level as a ring around the source FAB; --level is 0..1. */
+.level-ring {
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  background: conic-gradient(var(--ok) calc(var(--level, 0) * 360deg), transparent 0);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+  pointer-events: none;
+}
+
+/* Beat dot: a badge on the lag FAB that flashes on each delayed onset. */
+.beat {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.15);
+  transition: background 120ms;
+}
+.beat.on {
+  background: var(--accent);
+  transition: none;
+}
+
+.popover {
+  position: absolute;
+  bottom: calc(100% + 16px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  min-width: 240px;
+  max-width: min(360px, calc(100vw - 32px));
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 10px 40px rgb(0 0 0 / 0.5);
+}
+.popover[hidden] {
+  display: none;
+}
+.popover input[type="range"] {
+  width: 100%;
+}
+.options {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+.options legend {
+  padding: 0;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.options > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.options.inline > div {
+  flex-direction: row;
+  gap: 4px;
+}
+.option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.option:hover {
+  background: rgb(255 255 255 / 0.06);
+}
+.option:has(input:checked) {
+  background: rgb(138 180 255 / 0.16);
+}
+.option input {
+  accent-color: var(--accent);
+  margin: 0;
+}
+.option .icon {
+  width: 20px;
+  height: 20px;
+  color: var(--muted);
+}
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+}
+.help {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+.tap-status {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+  /* Two lines reserved up front, so the popover never changes size while tapping. */
+  min-height: calc(2 * 1.4em);
+}
+
+/* Lag popover: a big round tap target above the slider row. */
+.lag-popover {
+  align-items: stretch;
+  width: 360px;
+}
+.tap-circle {
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  background: rgb(138 180 255 / 0.12);
+  color: var(--fg);
+  font: inherit;
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition:
+    background 120ms,
+    transform 80ms;
+}
+.tap-circle:hover {
+  background: rgb(138 180 255 / 0.2);
+}
+.tap-circle:active,
+.tap-circle.pressed {
+  background: rgb(138 180 255 / 0.35);
+  transform: scale(0.95);
+  transition: none;
+}
+.tap-circle kbd {
+  margin: 0;
+}
+.lag-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.lag-row input[type="range"] {
+  flex: 1;
+  min-width: 0;
+}
+.tap-status.warn {
+  color: var(--danger);
+}
+.tap-status.ok {
+  color: var(--ok);
+}
+.message {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(560px, calc(100% - 32px));
+  background: var(--card);
+  border: 1px solid var(--danger);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  backdrop-filter: blur(12px);
+  z-index: 2;
+}
+.message[hidden] {
+  display: none;
+}
+.message p {
+  margin: 0 0 10px;
+}
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.toast {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  max-width: 360px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  color: var(--muted);
+}
+.toast[hidden] {
+  display: none;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.unsupported {
+  max-width: 40rem;
+  margin: 10vh auto;
+  padding: 24px;
+}
+.unsupported h1 {
+  font-size: 24px;
+}
+.unsupported li {
+  margin: 4px 0;
+}
+.lag-popover .options {
+  border-top: 0.5px solid var(--border);
+  padding-top: 10px;
+}
+/* Inside popovers, fields take the popover's width and long values (device names) truncate. */
+.popover .field {
+  display: flex;
+  min-width: 0;
+}
+.popover .field[hidden] {
+  display: none;
+}
+.popover .field select {
+  flex: 1;
+  min-width: 0;
+  max-width: 100%;
+  text-overflow: ellipsis;
+}
+/* The start screen's play button: the primary FAB, larger. */
+.start-play {
+  width: 112px;
+  height: 112px;
+}
+.start-play .icon {
+  width: 44px;
+  height: 44px;
+}
+
+/* ---- Splash */
+.start {
+  gap: 28px;
+}
+.start h1 {
+  margin: 0;
+}
+.start-play {
+  margin: 24px 0;
+}
+.start-source {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(440px, calc(100vw - 32px));
+  text-align: left;
+}
+.field-label {
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ---- Source select. Closed: a 1px-outlined box with the chosen row and a caret.
+   Open: a 1px-outlined menu of every row; the chosen row has a solid icon, brighter text
+   and a solid outline. */
+.select {
+  position: relative;
+}
+.select-trigger,
+.select-menu {
+  border: 1px solid rgb(255 255 255 / 0.16);
+  border-radius: 16px;
+}
+.select-trigger {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px 18px;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  background: transparent;
+  cursor: pointer;
+  transition:
+    border-color 150ms,
+    background 150ms;
+}
+.select-trigger:hover,
+.select-trigger[aria-expanded="true"] {
+  border-color: rgb(255 255 255 / 0.4);
+  background: rgb(255 255 255 / 0.04);
+}
+.select-trigger .caret {
+  flex: none;
+  margin-left: auto;
+  color: rgb(255 255 255 / 0.6);
+  transition: transform 150ms;
+}
+.select-trigger[aria-expanded="true"] .caret {
+  transform: rotate(180deg);
+}
+.select-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: rgb(16 16 22 / 0.88);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  box-shadow: 0 16px 40px rgb(0 0 0 / 0.45);
+  outline: none;
+}
+.select-menu.up {
+  top: auto;
+  bottom: calc(100% + 8px);
+}
+.select-menu[hidden] {
+  display: none;
+}
+.select-option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  transition:
+    background 150ms,
+    border-color 150ms;
+}
+.select-option.active {
+  background: rgb(255 255 255 / 0.05);
+}
+.select-menu:focus-visible .select-option.active {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.opt-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgb(255 255 255 / 0.22);
+  border-radius: 50%;
+  color: rgb(255 255 255 / 0.7);
+  transition:
+    background 150ms,
+    color 150ms;
+}
+.opt-icon .icon {
+  width: 20px;
+  height: 20px;
+}
+.opt-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.opt-title {
+  color: rgb(255 255 255 / 0.62);
+  font-weight: 500;
+}
+.opt-desc {
+  color: rgb(255 255 255 / 0.4);
+  font-size: 12px;
+}
+/* The trigger always shows the chosen source, so it uses the selected look (minus the outline). */
+.select-trigger .opt-icon {
+  background: #fff;
+  border-color: #fff;
+  color: #111;
+}
+.select-trigger .opt-title {
+  color: #fff;
+}
+.select-trigger .opt-desc {
+  color: rgb(255 255 255 / 0.72);
+}
+.select-option[aria-selected="true"] {
+  border-color: rgb(255 255 255 / 0.9);
+}
+.select-option[aria-selected="true"] .opt-icon {
+  background: #fff;
+  border-color: #fff;
+  color: #111;
+}
+.select-option[aria-selected="true"] .opt-title {
+  color: #fff;
+}
+.select-option[aria-selected="true"] .opt-desc {
+  color: rgb(255 255 255 / 0.72);
+}
+
+/* ---- On/off switch rows (popovers) */
+.switch-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-top: 10px;
+  border-top: 0.5px solid var(--border);
+  cursor: pointer;
+}
+.switch-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.switch-title {
+  font-weight: 500;
+}
+.switch-desc {
+  color: var(--muted);
+  font-size: 12px;
+}
+.switch {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  flex: none;
+  width: 40px;
+  height: 24px;
+  margin: 0;
+  border: 1px solid rgb(255 255 255 / 0.22);
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+  transition:
+    background 150ms,
+    border-color 150ms;
+}
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.6);
+  transition:
+    transform 150ms,
+    background 150ms;
+}
+.switch:checked {
+  background: #fff;
+  border-color: #fff;
+}
+.switch:checked::after {
+  transform: translateX(16px);
+  background: #111;
+}
+@media (prefers-reduced-motion: reduce) {
+  .switch,
+  .switch::after {
+    transition: none;
+  }
+}

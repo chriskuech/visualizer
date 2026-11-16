@@ -1,0 +1,9 @@
+node_modules
+dist
+test-results
+playwright-report
+.DS_Store
+tests/e2e/fixtures
+.claude/
+# Kept locally, not published.
+SPEC.md
