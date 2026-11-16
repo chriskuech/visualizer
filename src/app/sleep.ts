@@ -1,6 +1,5 @@
 import type { Store } from '../core/store';
 import type { CaptureSession } from '../services/capture-session';
-import type { WakeLockService } from '../services/wake-lock';
 import type { AppState } from './state';
 
 /** Visuals that may put the screen to sleep when the music stops. */
@@ -17,15 +16,14 @@ export const SLEEP = {
 export interface SleepDeps {
   store: Store<AppState>;
   session: CaptureSession;
-  wake: WakeLockService;
   /** The canvas: faded with CSS opacity over the black page background. */
   stage: HTMLElement;
 }
 
 /**
- * Sleep mode for the sleep visuals: after `afterS` of quiet the visual fades to black and the
- * screen is no longer kept awake, so the display can sleep (and an OLED is spared). When sound
- * returns, or the visual or source changes, it fades back in and keeps the screen awake again.
+ * Sleep mode for the sleep visuals: after `afterS` of quiet the visual fades to black, sparing an
+ * OLED. When sound returns, or the visual or source changes, it fades back in. Whether the screen
+ * is kept awake is up to fullscreen alone (see keep-awake.ts).
  */
 export class SleepController {
   private asleep = false;
@@ -60,7 +58,5 @@ export class SleepController {
     if (shouldSleep === this.asleep) return;
     this.asleep = shouldSleep;
     this.deps.stage.style.opacity = shouldSleep ? '0' : '1';
-    if (shouldSleep) this.deps.wake.stop();
-    else if (running) void this.deps.wake.start();
   }
 }

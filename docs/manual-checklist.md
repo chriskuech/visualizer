@@ -12,7 +12,7 @@ Use https://chriskuech.github.io/visualizer/ (or `npm run preview`) with music p
 | Mute system audio for 5 s → silence hint appears, clears when sound returns  |                                  |                       |                  |
 | Tab-only share captures that tab's audio                                     |                                  |                       |                  |
 | Tap calibration on a steady track reaches ok and the beat dot lines up       |                                  |                       |                  |
-| Chip reads "Screen kept awake"; screen stays on 2 h with the tab visible     |                                  |                       |                  |
+| Fullscreen keeps the screen on 2 h; after Esc the screen and Mac sleep again |                                  |                       |                  |
 | Fullscreen via F, button and double-click; Esc keeps the button state right  |                                  |                       |                  |
 
 Record the Linux result here (currently unverified, assumed tab audio only).

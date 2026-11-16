@@ -1,10 +1,9 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { SLEEP, SleepController } from '../../src/app/sleep';
 import type { AppState } from '../../src/app/state';
 import { QuietTracker } from '../../src/core/quiet';
 import { Store } from '../../src/core/store';
 import type { CaptureSession, SessionState } from '../../src/services/capture-session';
-import type { WakeLockService } from '../../src/services/wake-lock';
 
 describe('QuietTracker', () => {
   it('counts seconds since the last frame with sound', () => {
@@ -33,20 +32,14 @@ function setup(visualizer = 'ember') {
       return quietFor;
     },
   } as unknown as CaptureSession;
-  const wake: WakeLockService = {
-    status: 'off',
-    start: vi.fn(async () => {}),
-    stop: vi.fn(),
-    onChange: () => {},
-  };
   const stage = { style: {} as Record<string, string> } as unknown as HTMLElement;
-  const sleep = new SleepController({ store, session, wake, stage });
-  return { store, state, wake, stage, sleep, setQuiet: (s: number) => (quietFor = s) };
+  const sleep = new SleepController({ store, session, stage });
+  return { store, state, stage, sleep, setQuiet: (s: number) => (quietFor = s) };
 }
 
 describe('SleepController', () => {
-  it('fades out and lets the screen sleep after 10 quiet minutes on Ember', () => {
-    const { sleep, wake, stage, setQuiet } = setup();
+  it('fades out after 10 quiet minutes on Ember', () => {
+    const { sleep, stage, setQuiet } = setup();
     setQuiet(SLEEP.afterS - 1);
     sleep.check();
     expect(sleep.isAsleep).toBe(false);
@@ -54,18 +47,16 @@ describe('SleepController', () => {
     sleep.check();
     expect(sleep.isAsleep).toBe(true);
     expect(stage.style.opacity).toBe('0');
-    expect(wake.stop).toHaveBeenCalled();
   });
 
   it('wakes up when sound returns', () => {
-    const { sleep, wake, stage, setQuiet } = setup();
+    const { sleep, stage, setQuiet } = setup();
     setQuiet(SLEEP.afterS + 60);
     sleep.check();
     setQuiet(0);
     sleep.check();
     expect(sleep.isAsleep).toBe(false);
     expect(stage.style.opacity).toBe('1');
-    expect(wake.start).toHaveBeenCalled();
   });
 
   it('wakes up at once when the visual changes', () => {

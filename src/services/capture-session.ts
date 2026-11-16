@@ -12,7 +12,6 @@ import {
   toSourceError,
 } from './audio-source';
 import type { FrameReader } from './renderer';
-import type { WakeLockService } from './wake-lock';
 
 export type SourceRequest =
   | { readonly id: 'display' }
@@ -44,7 +43,6 @@ export interface CaptureDeps {
   createClock(ctx: AudioContext): Clock;
   createAnalyzer(ctx: AudioContext): Promise<Analyzer>;
   createSource(request: SourceRequest): AudioSource;
-  wake: WakeLockService;
   lagBuffer: LagBuffer;
   /** Receives every raw (undelayed) onset for tap calibration. */
   calibrator: TapCalibrator;
@@ -56,7 +54,7 @@ const SILENCE_DB = -80;
 const SILENCE_S = 5;
 
 /**
- * Owns the capture lifecycle: AudioContext, analyzer, the active source and the wake lock.
+ * Owns the capture lifecycle: AudioContext, analyzer, and the active source.
  * Feeds analyzer frames into the lag buffer and the calibrator, and serves delayed frames to the
  * renderer. Knows nothing about the DOM.
  */
@@ -87,7 +85,7 @@ export class CaptureSession implements FrameReader {
 
   /**
    * Starts (or switches to) a source. Call from a user gesture: the synchronous part creates
-   * and resumes the AudioContext and requests the wake lock before the first await.
+   * and resumes the AudioContext before the first await.
    */
   async start(request: SourceRequest): Promise<void> {
     const deps = this.deps;
@@ -96,7 +94,6 @@ export class CaptureSession implements FrameReader {
       this.clock = deps.createClock(this.ctx);
     } else void this.ctx.resume();
     const ctx = this.ctx;
-    void deps.wake.start();
     const token = ++this.token;
     this.disconnect();
     this.state.set({ phase: { kind: 'starting', source: request.id }, silent: false });
@@ -119,14 +116,12 @@ export class CaptureSession implements FrameReader {
       source.onEnded(() => {
         if (this.source !== source) return;
         this.disconnect();
-        deps.wake.stop();
         this.state.set({ phase: { kind: 'error', source: source.id, error: 'ended', detail: '' } });
       });
       this.state.set({ phase: { kind: 'running', source } });
     } catch (err) {
       source.stop();
       if (token !== this.token) return;
-      deps.wake.stop();
       const e = toSourceError(err);
       this.state.set({
         phase: { kind: 'error', source: request.id, error: e.code, detail: e.message },
@@ -137,7 +132,6 @@ export class CaptureSession implements FrameReader {
   stop(): void {
     this.token++;
     this.disconnect();
-    this.deps.wake.stop();
     this.state.set({ phase: { kind: 'idle' }, silent: false });
   }
 

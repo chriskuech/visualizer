@@ -9,7 +9,7 @@ export interface WakeLockService {
 }
 
 /**
- * Screen Wake Lock with a video-loop fallback. The lock is held only while a source runs. The
+ * Screen Wake Lock with a video-loop fallback. The caller decides when it is held. The
  * browser releases it when the tab is hidden, so it is re-requested on visibilitychange.
  */
 export class ScreenWakeLock implements WakeLockService {

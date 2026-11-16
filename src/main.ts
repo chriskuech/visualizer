@@ -10,6 +10,7 @@ import { mountControlsView } from './app/controls-view';
 import { byId } from './app/dom';
 import { filePicker } from './app/file-picker';
 import { mountHudView } from './app/hud-view';
+import { keepAwakeInFullscreen } from './app/keep-awake';
 import { bindKeyboard } from './app/keyboard';
 import { mountMessageView } from './app/message-view';
 import { SleepController } from './app/sleep';
@@ -62,7 +63,6 @@ function boot(): void {
     createAnalyzer: (ctx) =>
       mainThread ? Promise.resolve(new MainThreadAnalyzer(ctx)) : WorkletAnalyzer.create(ctx),
     createSource,
-    wake,
     lagBuffer: new LagBuffer(256),
     calibrator,
     lagMs: () => store.get().lagMs,
@@ -87,7 +87,8 @@ function boot(): void {
   renderer.onTick(mountHudView(store, session, panel));
   bindKeyboard(controller);
   renderer.start();
-  new SleepController({ store, session, wake, stage: byId('stage') }).start();
+  keepAwakeInFullscreen(store, wake);
+  new SleepController({ store, session, stage: byId('stage') }).start();
 
   if (import.meta.env.DEV) Object.assign(window, { store, session, controller });
 }

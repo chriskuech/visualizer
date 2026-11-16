@@ -9,7 +9,6 @@ import {
   CaptureSession,
   type SourceRequest,
 } from '../../src/services/capture-session';
-import type { WakeLockService, WakeStatus } from '../../src/services/wake-lock';
 
 /** Fakes for every injected dependency: no browser needed. */
 function setup(startSource: () => Promise<AudioNode> = async () => ({}) as AudioNode) {
@@ -35,19 +34,12 @@ function setup(startSource: () => Promise<AudioNode> = async () => ({}) as Audio
       ended = cb;
     },
   };
-  const wake: WakeLockService & { status: WakeStatus } = {
-    status: 'off',
-    start: vi.fn(async () => {}),
-    stop: vi.fn(),
-    onChange: () => {},
-  };
   let now = 0;
   const deps: CaptureDeps = {
     createContext: () => ({ resume: async () => {} }) as unknown as AudioContext,
     createClock: () => ({ fromPerf: (p) => p / 1000, now: () => now }),
     createAnalyzer: async () => analyzer,
     createSource: (_r: SourceRequest) => source,
-    wake,
     lagBuffer: new LagBuffer(),
     calibrator: new TapCalibrator(),
     lagMs: () => 100,
@@ -57,7 +49,6 @@ function setup(startSource: () => Promise<AudioNode> = async () => ({}) as Audio
     session,
     analyzer,
     source,
-    wake,
     emit: (f: FeatureFrame) => emit(f),
     end: () => ended('user'),
     setNow: (t: number) => {
@@ -71,10 +62,9 @@ const frame = (t: number, levelDb = -20, onset = false) =>
 
 describe('CaptureSession', () => {
   it('runs a source and serves frames delayed by the lag', async () => {
-    const { session, emit, setNow, wake } = setup();
+    const { session, emit, setNow } = setup();
     await session.start({ id: 'display' });
     expect(session.state.get().phase.kind).toBe('running');
-    expect(wake.start).toHaveBeenCalled();
     for (let i = 0; i <= 10; i++) emit(frame(i / 10));
     setNow(1.0);
     const out = createFrame();
@@ -82,8 +72,8 @@ describe('CaptureSession', () => {
     expect(out.rms).toBeCloseTo(0.9, 5); // now - 100 ms
   });
 
-  it('reports a source error and releases the wake lock', async () => {
-    const { session, wake } = setup(async () => {
+  it('reports a source error', async () => {
+    const { session } = setup(async () => {
       throw new SourceError('no-audio', 'none');
     });
     await session.start({ id: 'display' });
@@ -92,7 +82,6 @@ describe('CaptureSession', () => {
       error: 'no-audio',
       source: 'display',
     });
-    expect(wake.stop).toHaveBeenCalled();
   });
 
   it('moves to an ended error when the user stops sharing', async () => {
