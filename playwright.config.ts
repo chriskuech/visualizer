@@ -43,6 +43,9 @@ export default defineConfig({
             'media.navigator.streams.fake': true,
             'media.navigator.permission.disabled': true,
             'media.autoplay.default': 0,
+            // CI runners have no GPU: allow software WebGL so the app is not "unsupported".
+            'webgl.force-enabled': true,
+            'webgl.disable-fail-if-major-performance-caveat': true,
           },
         },
       },
