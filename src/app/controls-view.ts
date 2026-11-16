@@ -216,18 +216,21 @@ export function mountControlsView(
   fab.fullscreen.hidden = !Fullscreen.supported;
   fab.fullscreen.addEventListener('click', () => controller.toggleFullscreen());
   byId('stage').addEventListener('dblclick', () => controller.toggleFullscreen());
-  const updateCursor = () =>
-    app.classList.toggle('cursor-hidden', store.get().fullscreen && !panel.isVisible);
-  panel.onChange(updateCursor);
   store.select(
     (s) => s.fullscreen,
     (fs) => {
       fab.fullscreen.setAttribute('aria-pressed', String(fs));
       setIcon(byId('fullscreen-icon'), fs ? 'fullscreenExit' : 'fullscreen');
       setTip(fab.fullscreen, fs ? 'Exit fullscreen (F)' : 'Fullscreen (F)');
-      updateCursor();
     },
   );
+
+  // The cursor hides with the controls (windowed or fullscreen) once the visualizer has started;
+  // any mouse move or key brings both back. The splash always keeps the cursor.
+  const updateCursor = () =>
+    app.classList.toggle('cursor-hidden', store.get().started && !panel.isVisible);
+  panel.onChange(updateCursor);
+  store.select((s) => s.started, updateCursor);
 
   // A new capture starts a fresh tap session.
   session.state.select(

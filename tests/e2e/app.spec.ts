@@ -144,6 +144,19 @@ test('floating controls hide after idle and become inert', async ({ page }) => {
   await expect(panel).toHaveClass(/visible/);
 });
 
+test('the cursor hides and returns with the controls, not on the splash', async ({ page }) => {
+  await page.goto('./');
+  await expect(page.locator('#app')).not.toHaveClass(/cursor-hidden/);
+  await startWithFile(page);
+  await page.mouse.move(300, 200);
+  const app = page.locator('#app');
+  await expect(app).not.toHaveClass(/cursor-hidden/);
+  await expect(app).toHaveClass(/cursor-hidden/, { timeout: 6_000 }); // controls idle-hide
+  expect(await page.locator('#stage').evaluate((el) => getComputedStyle(el).cursor)).toBe('none');
+  await page.mouse.move(320, 220);
+  await expect(app).not.toHaveClass(/cursor-hidden/);
+});
+
 test('fullscreen toggle follows the real state', async ({ page }) => {
   await startWithFile(page);
   const enabled = await page.evaluate(() => document.fullscreenEnabled);

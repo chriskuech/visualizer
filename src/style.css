@@ -35,6 +35,7 @@ body {
   inset: 0;
   background: var(--bg);
 }
+/* The cursor hides together with the controls (toggled by controls-view). */
 .app.cursor-hidden,
 .app.cursor-hidden * {
   cursor: none;
