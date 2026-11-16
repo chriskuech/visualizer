@@ -38,6 +38,9 @@ export default defineConfig({
       name: 'firefox',
       use: {
         ...devices['Desktop Firefox'],
+        // Headless Firefox on Linux has no WebGL. In CI it runs headed on a virtual display
+        // (xvfb-run) with Mesa software GL instead; see .github/workflows/publish.yml.
+        headless: !process.env.FIREFOX_HEADED,
         launchOptions: {
           firefoxUserPrefs: {
             'media.navigator.streams.fake': true,
