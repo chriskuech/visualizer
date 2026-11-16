@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>Audio Visualizer</title>
+    <meta name="description" content="Real-time visualizer for the audio your computer is playing." />
+    <script type="module" crossorigin src="/visualizer/assets/index-BlFlaF_m.js"></script>
+    <link rel="stylesheet" crossorigin href="/visualizer/assets/index-CANVHNDr.css">
+  </head>
+  <body>
+    <div id="app" class="app">
+      <canvas id="stage" class="stage" aria-label="Audio visualization"></canvas>
+      <div id="hud" class="hud" aria-hidden="true"></div>
+
+      <section id="start" class="start" aria-labelledby="start-title">
+        <h1 id="start-title">Audio Visualizer</h1>
+        <button id="start-btn" class="fab primary start-play" type="button" data-tip="Start" aria-label="Start">
+          <svg id="start-icon" class="icon" viewBox="0 0 24 24" aria-hidden="true"></svg>
+        </button>
+        <div class="start-source">
+          <span id="start-source-label" class="field-label">Source</span>
+          <div id="start-source"></div>
+        </div>
+      </section>
+
+      <div id="message" class="message" role="alert" hidden>
+        <p id="message-text"></p>
+        <div id="message-actions" class="actions"></div>
+      </div>
+
+      <div id="toast" class="toast" role="status" hidden></div>
+
+      <div id="panel" class="fab-bar" role="toolbar" aria-label="Controls" inert aria-hidden="true">
+        <div class="fab-slot">
+          <button id="fab-source" class="fab" type="button" data-tip="Source" aria-label="Source" aria-haspopup="dialog" aria-expanded="false" aria-controls="pop-source">
+            <svg id="source-icon" class="icon" viewBox="0 0 24 24" aria-hidden="true"></svg>
+            <span id="level-ring" class="level-ring" aria-hidden="true"></span>
+          </button>
+          <div id="pop-source" class="popover" role="dialog" aria-label="Source" hidden>
+            <fieldset class="options">
+              <legend>Source</legend>
+              <div id="source-options"></div>
+            </fieldset>
+            <label id="device-wrap" class="field" hidden>
+              <span>Input</span>
+              <select id="device"></select>
+            </label>
+            <label class="switch-row">
+              <span class="switch-text">
+                <span class="switch-title">Denoise</span>
+                <span class="switch-desc">Filters out steady hiss and hum so the visuals don't jitter.</span>
+              </span>
+              <input id="denoise" class="switch" type="checkbox" />
+            </label>
+          </div>
+        </div>
+
+        <div class="fab-slot">
+          <button id="fab-lag" class="fab" type="button" data-tip="Lag" aria-label="Lag" aria-haspopup="dialog" aria-expanded="false" aria-controls="pop-lag">
+            <svg id="lag-icon" class="icon" viewBox="0 0 24 24" aria-hidden="true"></svg>
+            <span id="beat" class="beat" aria-hidden="true"></span>
+          </button>
+          <div id="pop-lag" class="popover lag-popover" role="dialog" aria-label="Lag and performance" hidden>
+            <button id="tap" class="tap-circle" type="button" aria-describedby="tap-status">
+              Tap<kbd>T</kbd>
+            </button>
+            <p id="tap-status" class="tap-status" aria-live="off"></p>
+            <div class="lag-row">
+              <input id="lag-slider" type="range" min="0" max="1000" step="1" aria-label="Lag (ms)" />
+              <label class="number">
+                <input id="lag-number" type="number" min="0" max="1000" step="1" inputmode="numeric" aria-label="Lag in milliseconds" />
+                <span>ms</span>
+              </label>
+              <button id="lag-clear" class="btn" type="button">Clear</button>
+            </div>
+            <p class="help">Tap along to the beat you hear. Left/Right nudge 1 ms, Shift for 10 ms.</p>
+            <fieldset class="options inline">
+              <legend>Render quality</legend>
+              <div id="scale-options"></div>
+            </fieldset>
+          </div>
+        </div>
+
+        <div class="fab-slot">
+          <button id="fab-visual" class="fab" type="button" data-tip="Visual" aria-label="Visual" aria-haspopup="dialog" aria-expanded="false" aria-controls="pop-visual">
+            <svg id="visual-icon" class="icon" viewBox="0 0 24 24" aria-hidden="true"></svg>
+          </button>
+          <div id="pop-visual" class="popover" role="dialog" aria-label="Visual" hidden>
+            <fieldset class="options">
+              <legend>Visual</legend>
+              <div id="visualizer-options"></div>
+            </fieldset>
+          </div>
+        </div>
+
+        <div class="fab-slot">
+          <button id="fab-stop" class="fab primary" type="button" data-tip="Stop" aria-label="Stop">
+            <svg id="stop-icon" class="icon" viewBox="0 0 24 24" aria-hidden="true"></svg>
+          </button>
+        </div>
+
+        <div class="fab-slot">
+          <button id="fullscreen" class="fab" type="button" data-tip="Fullscreen" aria-label="Fullscreen" aria-pressed="false">
+            <svg id="fullscreen-icon" class="icon" viewBox="0 0 24 24" aria-hidden="true"></svg>
+          </button>
+        </div>
+      </div>
+
+      <input id="file-input" type="file" accept="audio/*" hidden />
+      <div id="live" class="sr-only" aria-live="polite"></div>
+    </div>
+  </body>
+</html>
